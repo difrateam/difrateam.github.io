@@ -1,0 +1,142 @@
+
+
+<!doctype html>
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Метод распространяющегося пучка (Beam propogation method, BPM) &#8212; документация difra 0.0.1</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="Методы расчета планарных волноводов" href="multi_layer_slab_solver.html" />
+    <link rel="prev" title="Установка пакета difra" href="install.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             accesskey="I">указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="multi_layer_slab_solver.html" title="Методы расчета планарных волноводов"
+             accesskey="N">вперёд</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Установка пакета difra"
+             accesskey="P">назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Метод распространяющегося пучка (Beam propogation method, BPM)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="beam-propogation-method-bpm">
+<h1>Метод распространяющегося пучка (Beam propogation method, BPM)<a class="headerlink" href="#beam-propogation-method-bpm" title="Ссылка на этот заголовок">¶</a></h1>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Beam_propagation_method">Метод распространяющегося пучка</a> используется для расчета планарной задачи о распределении электромагнитного поля с помощью решения уравнения Гельмгольца.
+Метод конечных разностей позволяет дискретизировать задачу в пространстве с помощью равномерной прямоугольной сетки. Решается следующее уравнение</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 E}{\partial x^2} + \frac{\partial^2 E}{\partial y^2} + \beta E = 0\]</div>
+<section id="difra">
+<h2>Использование метода распространяющегося пучка в difra<a class="headerlink" href="#difra" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Примеры использования метода BPM находится в директории <cite>examples</cite></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">case_name</span> <span class="o">=</span> <span class="s2">&quot;Y-junction&quot;</span>
+<span class="n">bpm_params</span> <span class="o">=</span> <span class="n">generate_Y_junction_geometry</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">fd_bpm</span><span class="p">(</span><span class="n">bpm_params</span><span class="p">)</span>
+<span class="n">vizualize_field</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">bpm_params</span><span class="p">,</span> <span class="n">case_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Пример расчета напряженности электрического поля для Y-разветвителя:</p>
+<img alt="Y-junction" class="align-center" src="_images/Y-junction.png" />
+<p>Пример расчета напряженности электрического поля для многомодового интерферометра (miltumode interferometer)</p>
+<a class="reference internal image-reference" href="_images/Taped_MMI1x2.png"><img alt="Taped MMI1x2" class="align-center" src="_images/Taped_MMI1x2.png" style="height: 600px;" /></a>
+</section>
+<section id="id2">
+<h2>Литература<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">¶</a></h2>
+<ol class="arabic simple">
+<li><p><em>Kenji Kawano</em> and <em>Tsutomu Kitoh</em>, “Introduction to optical waveguide analysis: Solving Maxwell’s equation and the Schrodinger equation,” John Wiley &amp; Son, 2001</p></li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Оглавление</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Метод распространяющегося пучка (Beam propogation method, BPM)</a><ul>
+<li><a class="reference internal" href="#difra">Использование метода распространяющегося пучка в difra</a></li>
+<li><a class="reference internal" href="#id2">Литература</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Предыдущий раздел</h4>
+  <p class="topless"><a href="install.html"
+                        title="предыдущая глава">Установка пакета difra</a></p>
+  <h4>Следующий раздел</h4>
+  <p class="topless"><a href="multi_layer_slab_solver.html"
+                        title="следующая глава">Методы расчета планарных волноводов</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             >указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="multi_layer_slab_solver.html" title="Методы расчета планарных волноводов"
+             >вперёд</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Установка пакета difra"
+             >назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Метод распространяющегося пучка (Beam propogation method, BPM)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Difra Lab.
+    </div>
+  </body>
+</html>

@@ -54,28 +54,406 @@
             
   <section id="beam-propogation-method-bpm">
 <h1>Метод распространяющегося пучка (Beam propogation method, BPM)<a class="headerlink" href="#beam-propogation-method-bpm" title="Ссылка на этот заголовок">¶</a></h1>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Beam_propagation_method">Метод распространяющегося пучка</a> используется для расчета планарной задачи о распределении электромагнитного поля с помощью решения уравнения Гельмгольца.
-Метод конечных разностей позволяет дискретизировать задачу в пространстве с помощью равномерной прямоугольной сетки. Решается следующее уравнение</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Beam_propagation_method">Метод распространяющегося пучка</a> используется для расчета планарной задачи о распределении
+электромагнитного поля с помощью решения уравнения Гельмгольца. Этот подход получил широкое распространение и за счет простоты и скорости выполнения
+расчетов в отличии от прямого трехмерного численного моделирования во временной области. Распространение излучения описывается с помощью параксиального
+приближения волнового уравнения, которое предполагает, что волновой вектор отклонен на небольшой угол относительно оси распространения.
+Использование аппарата конечных разностей в методе распространяющего пучка позволяет неплохо воссоздать картину распространения излучения.</p>
+<p>Метод конечных разностей позволяет дискретизировать задачу в пространстве с помощью равномерной прямоугольной сетки. Решается следующее уравнение для TE-моды [1]:</p>
 <div class="math notranslate nohighlight">
-\[\frac{\partial^2 E}{\partial x^2} + \frac{\partial^2 E}{\partial y^2} + \beta E = 0\]</div>
+\[\frac{\partial^2 E}{\partial x^2} + \frac{\partial^2 E}{\partial z^2} + k_0^2 n^2 E = 0,\]</div>
+<p>где <em>E</em> - подольная составляющая напряженности электрического поля (вдоль отсутствующего в расчетах третьего измерения), <em>k_0</em> - волновое число для входящего излучения (в вакууме), <em>n</em> - показатель преломления.</p>
+<p>Уравнение Гельмгольца для TM-моды имеет вид:</p>
+<div class="math notranslate nohighlight">
+\[n^2 \frac{\partial}{\partial x}\left( \frac{1}{n^2} \frac{\partial H}{\partial x} \right) + \frac{\partial^2 H}{\partial z^2} + k_0^2 n^2 H = 0,\]</div>
+<p>где <em>H</em> - подольная составляющая напряженности магнитного поля (вдоль отсутствующего в расчетах третьего измерения).</p>
+<p>Ключевая идея метода распространяющегося пучка заключается в использовании метода медленно меняющейся амплитуды:</p>
+<div class="math notranslate nohighlight">
+\[E(x,z) = \phi(x,z)\exp(- i n_{eff} k_0 z), \frac{\partial^2 \phi}{\partial z^2} = 0.\]</div>
+<p>Этот подход позволяет понизить старшую производную вдоль направления распространиения волны <em>z</em> и свести задачу к волновому уравнению Френеля параболического типа.</p>
+<div class="math notranslate nohighlight">
+\[\text{TE мода: } 2i n_{eff} k_0 \frac{\partial \phi}{\partial z} = \frac{\partial^2 \phi}{\partial x^2} + k_0^2\left(n^2 - n_{eff}^2 \right),\]</div>
+<div class="math notranslate nohighlight">
+\[\text{TM мода: } 2i n_{eff} k_0 \frac{\partial \phi}{\partial z} = n^2 \frac{\partial}{\partial x}\left( \frac{1}{n^2} \frac{\partial \phi}{\partial x} \right) + k_0^2\left(n^2 - n_{eff}^2 \right).\]</div>
 <section id="difra">
-<h2>Использование метода распространяющегося пучка в difra<a class="headerlink" href="#difra" title="Ссылка на этот заголовок">¶</a></h2>
-<p>Примеры использования метода BPM находится в директории <cite>examples</cite></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">case_name</span> <span class="o">=</span> <span class="s2">&quot;Y-junction&quot;</span>
-<span class="n">bpm_params</span> <span class="o">=</span> <span class="n">generate_Y_junction_geometry</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
-<span class="n">E</span> <span class="o">=</span> <span class="n">fd_bpm</span><span class="p">(</span><span class="n">bpm_params</span><span class="p">)</span>
-<span class="n">vizualize_field</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">bpm_params</span><span class="p">,</span> <span class="n">case_name</span><span class="p">)</span>
+<h2>Расчет многомодового интерференционного элемента в пакете difra<a class="headerlink" href="#difra" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Многомодовый интерференционный элемент, <strong>МИЭ</strong> (multi-mode interference element, <strong>MMI</strong>) предназначен для разделения мощности излучения.
+В таком элементе ключевую роль играет область с широким волноводном, где одновременно возбуждаются несколько оптических мод.
+На выходных волноводах этого элемента происходит разделение мощности за счет интерференционного эффекта.
+Этот элемент проектируется для конкретной длины волны излучения. Представлены реализации для различных варианты разделения MMI1x2, MM1x3, MMI2x2
+в которых, соотвественного, излучение делится пополам в каждом выходном волноводе, излучение делится на 3 части, излучения перемещается из одного
+входного волновода в накрестлежащий выходной волновод.</p>
+<figure class="align-center" id="id6">
+<img alt="Геомтерия MMI1x2" src="_images/pic_MMI1x2.png" />
+<figcaption>
+<p><span class="caption-text">На рисунке представлены геометрические параметры многомодового интерференционного элемента с одим входом и двумя выходами</span><a class="headerlink" href="#id6" title="Постоянная ссылка на рисунок">¶</a></p>
+</figcaption>
+</figure>
+<p>Приведем пример использования метода BPM для расчета TE-моды в MMI1x2, который позволяет разделить входящее излучение на 2 равные части.
+Начнем с подключения пакетов: <em>difra</em> для численного решения дифференциальных уравнений в частных производных, <em>numpy</em> для математических функций,
+<em>matplotlib</em> для визуализации результатов.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">difra.bpm</span> <span class="kn">import</span> <span class="n">BPM_params</span><span class="p">,</span> <span class="n">fd_bpm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
-<p>Пример расчета напряженности электрического поля для Y-разветвителя:</p>
-<img alt="Y-junction" class="align-center" src="_images/Y-junction.png" />
-<p>Пример расчета напряженности электрического поля для многомодового интерферометра (miltumode interferometer)</p>
-<a class="reference internal image-reference" href="_images/Taped_MMI1x2.png"><img alt="Taped MMI1x2" class="align-center" src="_images/Taped_MMI1x2.png" style="height: 600px;" /></a>
+<p>Функция, которая возвращает объект с геометрическими параметрами рачетной области многомодового интерференционного элемента, имеет вид.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_MMI1x2_geometry</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create geometry parameters for uniform MMI 1 input port, 2 output ports</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">n_clad</span> <span class="o">=</span> <span class="mf">1.444</span>
+    <span class="n">n_core</span> <span class="o">=</span> <span class="mf">1.674</span>
+    <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.694</span>
+    <span class="n">width_MMI_wg</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">width_MMI_eff</span> <span class="o">=</span> <span class="n">width_MMI_wg</span> <span class="o">+</span> <span class="n">wl</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_core</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">n_clad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">length_MMI_wg</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">n_core</span><span class="o">*</span><span class="n">width_MMI_eff</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+    <span class="n">dist_out_wg</span> <span class="o">=</span> <span class="n">width_MMI_eff</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">width_in_wg</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">length_in_wg</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">width_out_wg</span> <span class="o">=</span> <span class="n">width_in_wg</span>
+    <span class="n">length_out_wg</span> <span class="o">=</span> <span class="n">length_in_wg</span>
+    <span class="n">offset_in_wg</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="mi">501</span>
+    <span class="n">Nz</span> <span class="o">=</span> <span class="mi">1001</span>
+    <span class="n">domain_width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">width_MMI_wg</span>
+    <span class="n">domain_length</span> <span class="o">=</span> <span class="n">length_in_wg</span> <span class="o">+</span> <span class="n">length_MMI_wg</span> <span class="o">+</span> <span class="n">length_out_wg</span>
+
+    <span class="n">MMI_geometry</span> <span class="o">=</span> <span class="n">BPM_params</span><span class="p">(</span><span class="n">n_clad</span><span class="p">,</span> <span class="n">n_core</span><span class="p">,</span> <span class="n">n_eff</span><span class="p">,</span> <span class="n">domain_width</span><span class="p">,</span>
+                              <span class="n">domain_length</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">width_in_wg</span><span class="p">,</span>
+                              <span class="n">offset_in_wg</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+    
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">MMI_geometry</span>
+</pre></div>
+</div>
+<p>Для правильного выбора длины многомодового волновода МИЭ рассчитывается эффективная ширина волновода <em>width_MMI_eff</em>, длина биений <em>L_pi</em> и длина волновода <em>L</em> [2]:</p>
+<div class="math notranslate nohighlight">
+\[w_{eff} = w + \lambda \pi \sqrt{n_{core}^2-n_{clad}^2}, \quad  L_{\pi} = \frac{4n_{core} w_{eff}^2}{3 \lambda},  \quad L = \frac{3L_{\pi}}{4*2}.\]</div>
+<p>Метод <em>generate_mesh_from_quadrilateral_block</em> позволяет задать значение показателя преломления равноt <em>n_core</em> в выбранной четырехугольной области.
+В остальной расчетной области показатель преломления равен <em>n_clad</em>.
+Блок однозначно определяется набором из четырех точек, расположенных так образом, что при последовательном обходе по ним область остается слева.
+Для вызова функции, которая генерирует геометерию задачи, и запуска расчетов можно использовать следующий скрипт.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">case_name</span> <span class="o">=</span> <span class="s2">&quot;MMI 1x2&quot;</span>
+<span class="n">bpm_params</span> <span class="o">=</span> <span class="n">generate_MMI1x2_geometry</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">fd_bpm</span><span class="p">(</span><span class="n">bpm_params</span><span class="p">)</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">bpm_params</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span>
+<span class="n">vizualize_field</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">case_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Здесь функция <em>vizualize_field</em> позволяет построить результат - распределение амплитуды напряженности электрического поля.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">vizualize_field</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Show field distribution with geometry borders</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">length_z</span><span class="p">,</span> <span class="n">length_x</span> <span class="o">=</span> <span class="n">size</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length_z</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">aspect</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">blocks</span> <span class="o">=</span> <span class="n">bpm_params</span><span class="o">.</span><span class="n">get_border_blocks</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;w-&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;w-&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> 
+                 <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;w-&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">block</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">length_x</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> 
+                 <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;w-&#39;</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">title</span><span class="o">+</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="_images/MMI1x2.png"><img alt="MMI1x2" src="_images/MMI1x2.png" style="height: 600px;" /></a>
+<figcaption>
+<p><span class="caption-text">Результат расчета напряженности электрического поля для многомодового интерференционного элемента.
+На рисунке белым цветом обозначены границы блоков с заданным показателем приломления, которые определяют геометрические параметры МИЭ.</span><a class="headerlink" href="#id7" title="Постоянная ссылка на рисунок">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="y-difra">
+<h2>Расчет Y-делителя в пакете difra<a class="headerlink" href="#y-difra" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Альтернативным способом разделения мощности излучения является Y-делитель (Y-junction), в котором раздваивающийся волновод направляет ЭМ-поле по двум каналам.
+Если угол разделения выходных волноводов будет большим, то возникнут большие потери мощности излучения. Если угол разделения мал, что увеличиваются размеры делителя.</p>
+<figure class="align-center" id="id8">
+<img alt="Геометрия Y-junction" src="_images/pic_Y_junction.png" />
+<figcaption>
+<p><span class="caption-text">На рисунке обозначены геометрические параметры Y-делителя оптического излучения</span><a class="headerlink" href="#id8" title="Постоянная ссылка на рисунок">¶</a></p>
+</figcaption>
+</figure>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_Y_junction_geometry</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create geometry parameters for Y-splitter with 1 input port, 2 output ports</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">n_clad</span> <span class="o">=</span> <span class="mf">1.444</span>
+    <span class="n">n_core</span> <span class="o">=</span> <span class="mf">1.674</span>
+    <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.694</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">30.</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">width_in_wg</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">width_out_wg</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">length_splitter</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">D</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">width_splitter</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">D</span> <span class="o">+</span> <span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">length_in_wg</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">length_out_wg</span> <span class="o">=</span> <span class="n">length_in_wg</span>
+    <span class="n">offset_in_wg</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="mi">301</span>
+    <span class="n">Nz</span> <span class="o">=</span> <span class="mi">2001</span>
+    <span class="n">domain_length</span> <span class="o">=</span> <span class="n">length_in_wg</span> <span class="o">+</span> <span class="n">length_splitter</span> <span class="o">+</span> <span class="n">length_out_wg</span>
+    <span class="n">domain_width</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">domain_length</span><span class="o">-</span><span class="n">length_in_wg</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    
+    <span class="n">MMI_geometry</span> <span class="o">=</span> <span class="n">BPM_params</span><span class="p">(</span><span class="n">n_clad</span><span class="p">,</span> <span class="n">n_core</span><span class="p">,</span> <span class="n">n_eff</span><span class="p">,</span> <span class="n">domain_width</span><span class="p">,</span>
+                              <span class="n">domain_length</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">width_in_wg</span><span class="p">,</span> <span class="n">offset_in_wg</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">width_splitter</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">width_splitter</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">width_splitter</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="p">(</span><span class="n">domain_length</span><span class="o">-</span><span class="n">length_in_wg</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+             <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="p">(</span><span class="n">domain_length</span><span class="o">-</span><span class="n">length_in_wg</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+             <span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">width_splitter</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_splitter</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="p">(</span><span class="n">domain_length</span><span class="o">-</span><span class="n">length_in_wg</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+             <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="p">(</span><span class="n">domain_length</span><span class="o">-</span><span class="n">length_in_wg</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+             <span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">MMI_geometry</span>
+</pre></div>
+</div>
+<figure class="align-center" id="id9">
+<img alt="Y-junction" src="_images/Y-junction.png" />
+<figcaption>
+<p><span class="caption-text">Результат расчета напряженности электрического поля для Y-разветвителя</span><a class="headerlink" href="#id9" title="Постоянная ссылка на рисунок">¶</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="id2">
-<h2>Литература<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">¶</a></h2>
+<h2>Геометрия многомодового интерференционного элемента с 2 входами и 2 выходами в пакете difra<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_MMI2x2_geometry</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create geometry parameters for uniform MMI 2 input ports, 2 output ports</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">n_clad</span> <span class="o">=</span> <span class="mf">1.444</span>
+    <span class="n">n_core</span> <span class="o">=</span> <span class="mf">1.674</span>
+    <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.694</span>
+    <span class="n">width_MMI_wg</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">width_MMI_eff</span> <span class="o">=</span> <span class="n">width_MMI_wg</span> <span class="o">+</span> <span class="n">wl</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_core</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">n_clad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">length_MMI_wg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">*</span><span class="n">n_core</span><span class="o">*</span><span class="n">width_MMI_eff</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+    <span class="n">dist_out_wg</span> <span class="o">=</span> <span class="n">width_MMI_eff</span><span class="o">/</span><span class="mi">3</span>
+    <span class="n">width_in_wg</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">length_in_wg</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">width_out_wg</span> <span class="o">=</span> <span class="n">width_in_wg</span>
+    <span class="n">length_out_wg</span> <span class="o">=</span> <span class="n">length_in_wg</span>
+    <span class="n">offset_in_wg</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="mi">501</span>
+    <span class="n">Nz</span> <span class="o">=</span> <span class="mi">1001</span>
+    <span class="n">domain_width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">width_MMI_wg</span>
+    <span class="n">domain_length</span> <span class="o">=</span> <span class="n">length_in_wg</span> <span class="o">+</span> <span class="n">length_MMI_wg</span> <span class="o">+</span> <span class="n">length_out_wg</span>
+
+    <span class="n">MMI_geometry</span> <span class="o">=</span> <span class="n">BPM_params</span><span class="p">(</span><span class="n">n_clad</span><span class="p">,</span> <span class="n">n_core</span><span class="p">,</span> <span class="n">n_eff</span><span class="p">,</span> <span class="n">domain_width</span><span class="p">,</span>
+                              <span class="n">domain_length</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">width_in_wg</span><span class="p">,</span>
+                            <span class="n">offset_in_wg</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">offset_in_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">offset_in_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">offset_in_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">offset_in_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">offset_in_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">offset_in_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">offset_in_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">offset_in_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span> 
+            <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+            <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">MMI_geometry</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>Геометрия многомодового интерференционного элемента с 1 входом и 2 выходами в пакете difra<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_taped_MMI1x2_geometry</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create geometry parameters for uniform MMI with tapers 1 input port, 2 output ports</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">n_clad</span> <span class="o">=</span> <span class="mf">1.444</span>
+    <span class="n">n_core</span> <span class="o">=</span> <span class="mf">1.674</span>
+    <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.694</span>
+    <span class="n">width_MMI_wg</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">width_MMI_eff</span> <span class="o">=</span> <span class="n">width_MMI_wg</span> <span class="o">+</span> <span class="n">wl</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_core</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">n_clad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">length_MMI_wg</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">n_core</span><span class="o">*</span><span class="n">width_MMI_eff</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+    <span class="n">dist_out_wg</span> <span class="o">=</span> <span class="n">width_MMI_eff</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">width_in_wg</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">width_taper</span> <span class="o">=</span> <span class="mf">2.</span>
+    <span class="n">length_in_wg</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">width_out_wg</span> <span class="o">=</span> <span class="n">width_in_wg</span>
+    <span class="n">length_out_wg</span> <span class="o">=</span> <span class="n">length_in_wg</span>
+    <span class="n">offset_in_wg</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="mi">501</span>
+    <span class="n">Nz</span> <span class="o">=</span> <span class="mi">1001</span>
+    <span class="n">domain_width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">width_MMI_wg</span>
+    <span class="n">domain_length</span> <span class="o">=</span> <span class="n">length_in_wg</span> <span class="o">+</span> <span class="n">length_MMI_wg</span> <span class="o">+</span> <span class="n">length_out_wg</span>
+    <span class="n">MMI_geometry</span> <span class="o">=</span> <span class="n">BPM_params</span><span class="p">(</span><span class="n">n_clad</span><span class="p">,</span> <span class="n">n_core</span><span class="p">,</span> <span class="n">n_eff</span><span class="p">,</span> <span class="n">domain_width</span><span class="p">,</span>
+                              <span class="n">domain_length</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">width_in_wg</span><span class="p">,</span>
+                              <span class="n">offset_in_wg</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_taper</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">MMI_geometry</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>Геометрия многомодового интерференционного элемента с 1 входом и 3 выходами в пакете difra<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_MMI1x3_geometry</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create geometry parameters for uniform MMI 1 input port, 3 output ports</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">n_clad</span> <span class="o">=</span> <span class="mf">1.444</span>
+    <span class="n">n_core</span> <span class="o">=</span> <span class="mf">1.674</span>
+    <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.694</span>
+    <span class="n">width_MMI_wg</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">width_MMI_eff</span> <span class="o">=</span> <span class="n">width_MMI_wg</span> <span class="o">+</span> <span class="n">wl</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_core</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">n_clad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">length_MMI_wg</span> <span class="o">=</span> <span class="mf">0.333</span><span class="o">*</span><span class="n">n_core</span><span class="o">*</span><span class="n">width_MMI_eff</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+    <span class="n">dist_out_wg</span> <span class="o">=</span> <span class="n">width_MMI_eff</span><span class="o">/</span><span class="mi">3</span>
+    <span class="n">width_in_wg</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">length_in_wg</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">width_out_wg</span> <span class="o">=</span> <span class="n">width_in_wg</span>
+    <span class="n">length_out_wg</span> <span class="o">=</span> <span class="n">length_in_wg</span>
+    <span class="n">offset_in_wg</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="mi">501</span>
+    <span class="n">Nz</span> <span class="o">=</span> <span class="mi">1001</span>
+    <span class="n">domain_width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">width_MMI_wg</span>
+    <span class="n">domain_length</span> <span class="o">=</span> <span class="n">length_in_wg</span> <span class="o">+</span> <span class="n">length_MMI_wg</span> <span class="o">+</span> <span class="n">length_out_wg</span>
+
+    <span class="n">MMI_geometry</span> <span class="o">=</span> <span class="n">BPM_params</span><span class="p">(</span><span class="n">n_clad</span><span class="p">,</span> <span class="n">n_core</span><span class="p">,</span> <span class="n">n_eff</span><span class="p">,</span>
+                              <span class="n">domain_width</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span>
+                            <span class="n">width_in_wg</span><span class="p">,</span> <span class="n">offset_in_wg</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_in_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_MMI_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">-</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span> 
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">length_in_wg</span><span class="o">+</span><span class="n">length_MMI_wg</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">dist_out_wg</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">),</span>
+             <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">domain_width</span><span class="o">+</span><span class="n">dist_out_wg</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">width_out_wg</span><span class="p">,</span> <span class="n">domain_length</span><span class="p">)]</span>
+    <span class="n">MMI_geometry</span><span class="o">.</span><span class="n">generate_mesh_from_quadrilateral_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">MMI_geometry</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>Литература<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">¶</a></h2>
 <ol class="arabic simple">
-<li><p><em>Kenji Kawano</em> and <em>Tsutomu Kitoh</em>, “Introduction to optical waveguide analysis: Solving Maxwell’s equation and the Schrodinger equation,” John Wiley &amp; Son, 2001</p></li>
+<li><p><em>Kenji Kawano</em> and <em>Tsutomu Kitoh</em>, “Introduction to optical waveguide analysis: Solving Maxwell’s equation and the Schrodinger equation”, John Wiley &amp; Son, 2001</p></li>
+<li><p><em>L.B. Soldano</em> and <em>E.C.M. Pennings</em>, “Optical multi-mode interference devices based on self-imaging: Principles and applications“, J. Lightwave Technol. 13, 615–627 (1995).</p></li>
 </ol>
 </section>
 </section>
@@ -90,8 +468,12 @@
   <h3><a href="index.html">Оглавление</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Метод распространяющегося пучка (Beam propogation method, BPM)</a><ul>
-<li><a class="reference internal" href="#difra">Использование метода распространяющегося пучка в difra</a></li>
-<li><a class="reference internal" href="#id2">Литература</a></li>
+<li><a class="reference internal" href="#difra">Расчет многомодового интерференционного элемента в пакете difra</a></li>
+<li><a class="reference internal" href="#y-difra">Расчет Y-делителя в пакете difra</a></li>
+<li><a class="reference internal" href="#id2">Геометрия многомодового интерференционного элемента с 2 входами и 2 выходами в пакете difra</a></li>
+<li><a class="reference internal" href="#id3">Геометрия многомодового интерференционного элемента с 1 входом и 2 выходами в пакете difra</a></li>
+<li><a class="reference internal" href="#id4">Геометрия многомодового интерференционного элемента с 1 входом и 3 выходами в пакете difra</a></li>
+<li><a class="reference internal" href="#id5">Литература</a></li>
 </ul>
 </li>
 </ul>

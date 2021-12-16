@@ -57,13 +57,36 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bpm.html">Метод распространяющегося пучка (Beam propogation method, BPM)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bpm.html#difra">Использование метода распространяющегося пучка в difra</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bpm.html#id2">Литература</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#difra">Расчет многомодового интерференционного элемента в пакете difra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#y-difra">Расчет Y-делителя в пакете difra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#id2">Геометрия многомодового интерференционного элемента с 2 входами и 2 выходами в пакете difra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#id3">Геометрия многомодового интерференционного элемента с 1 входом и 2 выходами в пакете difra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#id4">Геометрия многомодового интерференционного элемента с 1 входом и 3 выходами в пакете difra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bpm.html#id5">Литература</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="multi_layer_slab_solver.html">Методы расчета планарных волноводов</a></li>
 </ul>
 </div>
+</section>
+<section id="tutorial">
+<h1>Tutorial (Самоучитель)<a class="headerlink" href="#tutorial" title="Ссылка на этот заголовок">¶</a></h1>
+<ol class="arabic simple">
+<li><p>Выбор  материальной платформы: Пользователь задает материальные константы, тип волновода (глубокого или неглубокого травления)</p></li>
+<li><p><strong>ДМ</strong> Расчет планарного волновода: модовый состав в зависимости от толщины пленки, эффективный показатель преломления</p></li>
+<li><p><strong>КП</strong> Расчет поперечного сечения волновода: границы одномодовости, зависимость ЭПП моды от длины волны</p></li>
+<li><p><strong>КП</strong> Искривленный волновод: определение критического радиуса кривизны, потери больше 0.001 dB на pi/2</p></li>
+<li><p><strong>КП</strong> Зависимость ЭПП от длины волны для волновода с заданным радиусом кривизны</p></li>
+<li><p><strong>КП</strong> Расчет поперечного сечения многомодовой области MMI: количество мод, длина биений</p></li>
+<li><p><strong>КП</strong> Направленный ответвитель: расчет длины биений и ЭПП в зависимости то геометрии волноводов, расстояния между ними, длины волны</p></li>
+<li><p><strong>ДМ</strong> Метод ЭПП (EIM): расчет ЭПП для планарного волновода для использования в методе BPM</p></li>
+<li><p><strong>ДМ</strong> Метод ЭПП (EIM): расчет расчет ЭПП моды</p></li>
+<li><p><strong>КГ</strong> BPM: многомодовый интерференционный элемент (multi-mode interference element, MMI)</p></li>
+<li><p><strong>КГ</strong> BPM: Y-разветвитель (directional coupler, DC)</p></li>
+<li><p><strong>ДМ</strong> Дифракционная решетка на массиве волноводов (AWG): найти геометрические параметры AWG в зависимости от рабочих параметров</p></li>
+<li><p><strong>ДМ</strong> AWG: получить спектральную характеристику</p></li>
+<li><p><strong>ДМ</strong> AWG: получить ортогональную геометрию, на выходе маска в формате gds</p></li>
+</ol>
 </section>
 
 
@@ -73,6 +96,12 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Оглавление</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Программный пакет интегральной фотоники <em>difra</em></a></li>
+<li><a class="reference internal" href="#tutorial">Tutorial (Самоучитель)</a></li>
+</ul>
+
   <h4>Следующий раздел</h4>
   <p class="topless"><a href="install.html"
                         title="следующая глава">Установка пакета difra</a></p>

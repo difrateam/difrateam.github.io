@@ -1,0 +1,399 @@
+
+
+<!doctype html>
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Расчет планарного волновода &#8212; документация difra 0.0.1</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="Расчет поперечного сечения канальных волноводов" href="waveguide.html" />
+    <link rel="prev" title="Установка пакета difra" href="install.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             accesskey="I">указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="waveguide.html" title="Расчет поперечного сечения канальных волноводов"
+             accesskey="N">вперёд</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Установка пакета difra"
+             accesskey="P">назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Расчет планарного волновода</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1>Расчет планарного волновода<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Введение. Планарный волновод. с изменениями</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 E}{\partial x^2} + \frac{\partial^2 E}{\partial z^2} + k_0^2 n^2 E = 0,\]</div>
+<p>Какие уравнения решаются.
+График решения ???</p>
+<section id="id2">
+<h2>Модовый состав в зависимости от толщины пленки<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Пакет <strong>difra</strong> позволяет рассчитать модовый состав планарного волновода. Для этого нужно подключить пакеты:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">difra.eim</span> <span class="kn">import</span> <span class="n">MultiLayerSlab</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>Расчет делает следующий код:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bV_diagram</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Расчет планарного волновода - эффективный показатель преломления</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="mf">1.44562</span>
+    <span class="n">ns</span> <span class="o">=</span> <span class="mf">1.44562</span>
+    <span class="n">n_layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.9835</span><span class="p">])</span>
+    <span class="n">d_layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.3</span><span class="p">])</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="mf">1.55</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-6</span>
+    <span class="n">Max</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">thicknesses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">neffWGes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="n">thicknesses</span><span class="p">:</span>
+        <span class="n">d_layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">thickness</span><span class="p">])</span>
+        <span class="n">mls</span> <span class="o">=</span> <span class="n">MultiLayerSlab</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">nc</span><span class="p">,</span> <span class="n">n_layer</span><span class="p">,</span> <span class="n">d_layer</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+        <span class="n">neffWGes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mls</span><span class="o">.</span><span class="n">SlabSolver</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">Max</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;TE0&quot;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thicknesses</span><span class="p">,</span> <span class="n">neffWGes</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>В случае корректного расчета получается <em>b-V</em> диаграмма имеет вид:</p>
+<figure class="align-center" id="id4">
+<img alt="b-V диаграмма" src="_images/b-V-diagram.png" />
+<figcaption>
+<p><span class="caption-text"><em>b-V</em> диаграмма планарного волновода с параметрами …</span><a class="headerlink" href="#id4" title="Постоянная ссылка на рисунок">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id3">
+<h2>Эффективный показатель преломления<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">¶</a></h2>
+<p>bla-</p>
+</section>
+</section>
+<section id="module-multi_layer_slab_solver">
+<span id="api-multi-layer-slab-solver"></span><h1>API класса <strong>multi_layer_slab_solver</strong> для расчета планарных волноводов<a class="headerlink" href="#module-multi_layer_slab_solver" title="Ссылка на этот заголовок">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">multi_layer_slab_solver.</span></span><span class="sig-name descname"><span class="pre">MultiLayerSlab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab" title="Ссылка на это определение">¶</a></dt>
+<dd><p>MultiLayerSlab - класс, позволяющий находить 
+эффективные показатели преломления планарного волновода с произвольным
+числом слоев.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Переменные</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ns</strong> (<em>float</em>) – ПП подложки</p></li>
+<li><p><strong>nc</strong> (<em>float</em>) – ПП покровного слоя</p></li>
+<li><p><strong>n_layer</strong> (<em>numpy.array</em>) – ПП волноведущих слоев</p></li>
+<li><p><strong>d_layer</strong> (<em>numpy.array</em>) – Толщины волноведущих слоев</p></li>
+<li><p><strong>wl</strong> (<em>float</em>) – Длина волны</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.Field_TE">
+<span class="sig-name descname"><span class="pre">Field_TE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Neff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.Field_TE" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод Field_TE - функция отрисовки распределения ТЕ-моды</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Neff</strong> (<em>complex</em>) – ЭПП моды</p></li>
+<li><p><strong>index_mesh</strong> – сетка распределения ПП</p></li>
+<li><p><strong>mesh_x</strong> – разбиение по координате</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.Field_TM">
+<span class="sig-name descname"><span class="pre">Field_TM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Neff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.Field_TM" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод Field_TМ - функция отрисовки распределения ТМ-моды</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Neff</strong> (<em>complex</em>) – ЭПП моды</p></li>
+<li><p><strong>index_mesh</strong> – сетка распределения ПП</p></li>
+<li><p><strong>mesh_x</strong> – разбиение по координате</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.Muller">
+<span class="sig-name descname"><span class="pre">Muller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.Muller" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод Muller - функция для поиска корней алгебраических уравнений.
+Корнями могут быть как реальные, так и комплексные числа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> – функция, соответствующая исследуемому уравнению</p></li>
+<li><p><strong>x0</strong> – пробные значения, относительно которых будет начинаться поиск корней уравнения</p></li>
+<li><p><strong>x1</strong> – пробные значения, относительно которых будет начинаться поиск корней уравнения</p></li>
+<li><p><strong>x2</strong> – пробные значения, относительно которых будет начинаться поиск корней уравнения</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – точность поиска корня</p></li>
+<li><p><strong>Max</strong> (<em>int</em>) – число итераций приближения к корню</p></li>
+</ul>
+</dd>
+</dl>
+<p>#### Литература ####
+Computational photonics. An introduction with Matlab</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.RefractiveIndex_mesh">
+<span class="sig-name descname"><span class="pre">RefractiveIndex_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.RefractiveIndex_mesh" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод RefractiveIndex_mesh - функция, присваивающая значение ПП
+каждой точке одномерной сетки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Переменные</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interface</strong> – массив значений количества точек разбиения на каждый слой</p></li>
+<li><p><strong>index_layer</strong> – массив значения ПП каждого слоя</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>массив ПП</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.SlabSolver">
+<span class="sig-name descname"><span class="pre">SlabSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.SlabSolver" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод SlabSolver - функция по поиску и сортировке всевозможных мод
+планарного волновода с произвольным числом слоев. Суть метода 
+заключается в поиске всех решений дисперсионных уравнений планарного
+волновода с произвольным числом слоев, сортировка и запись решений
+в словари. Так как решений может быть несколько, метод содержит 
+числы, где итерируется по пробным значениям ЭПП в пределах
+максимального и минимального ПП. Это позволяет найти всевозможные
+корни.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eps</strong> (<em>float</em>) – точность поиска корня</p></li>
+<li><p><strong>Max</strong> (<em>int</em>) – число итераций приближения к корню</p></li>
+</ul>
+</dd>
+<dt class="field-even">Переменные</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>n_max</strong> (<em>complex</em>) – значение максимального ПП, используемого в качестве границы для поиска решения</p></li>
+<li><p><strong>n_min</strong> (<em>complex</em>) – значение минимального ПП, используемого в качестве границы для поиска решения</p></li>
+<li><p><strong>neff_init_0</strong> (<em>complex</em>) – пробное значения ЭПП, относительно которго ищется решение</p></li>
+<li><p><strong>neff_init_1</strong> (<em>complex</em>) – пробное значения ЭПП, относительно которго ищется решение</p></li>
+<li><p><strong>neff_init_2</strong> (<em>complex</em>) – пробное значения ЭПП, относительно которго ищется решение</p></li>
+<li><p><strong>dneff</strong> (<em>complex</em>) – шаг изменения начальных значений ЭПП (в некотором смысле точность поиска решения)</p></li>
+<li><p><strong>mode_control</strong> (<em>int</em>) – флаг, обозначающий</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return TE_modes</dt>
+<dd class="field-odd"><p>списки, куда записываются все решения</p>
+</dd>
+<dt class="field-even">Return TM_modes</dt>
+<dd class="field-even"><p>списки, куда записываются все решения</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.mesh_generator">
+<span class="sig-name descname"><span class="pre">mesh_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NumberMesh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.mesh_generator" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод mesh_generator - функция формирования одномерной сетки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_s</strong> (<em>float</em>) – толщина подложки</p></li>
+<li><p><strong>d_c</strong> (<em>float</em>) – толщина покровного слоя</p></li>
+<li><p><strong>d_layer</strong> (<em>numpy.array</em>) – массив толщин волноводных слоев</p></li>
+<li><p><strong>NumberMesh</strong> (<em>int</em>) – число точек разбиения, приходящихся на слой</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>сетка</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.neff_TE">
+<span class="sig-name descname"><span class="pre">neff_TE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neff_init</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.neff_TE" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод neff_TE - функция, представляющая собой дисперсионное уравнение 
+планарного волновода с произвольным числом слоев. На вход метода
+подается значение эффективного показателя преломления (ЭПП), 
+исследуемого
+волновода. Когда ЭПП, поступающий на вход метода, соответствует 
+истинному значению ЭПП волновода, то функция выдает значение 0.</p>
+<p>Модовые, полевые и другие волноводные значения могут быть комплексными.
+В методе нет циклов, вместо них применяется массивы numpy.
+При вычислении квадратных корней от отрицательных с помощью 
+встроенных функций numpy могут появляться ошибки. 
+Numpy не останавливает программу, а показывает ошибку RuntimeError
+в массиве с отрицательными числами при вычислении корня появляются
+значения nan. Чтобы иметь возможность вычислять корни от отрицательных
+числе, в исходном numpy массиве должно быть хотя бы одно комплексное 
+число. Тогда корень от отрицательных чисел вычисляется правильно. 
+В переменных gamma, kappa в массив к каждому числу добавляется 
+произведение 1j * 0, чтобы числа стали комплексными и была возможность
+вычисления корня.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>neff_init</strong> (<em>complex</em>) – пробное значение ЭПП</p>
+</dd>
+<dt class="field-even">Переменные</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>beta</strong> (<em>complex</em>) – постоянная распространения</p></li>
+<li><p><strong>NumLayers</strong> (<em>int</em>) – число волноводных слоев планарного волновода</p></li>
+<li><p><strong>gamma_subs</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+<li><p><strong>gamma_clad</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+<li><p><strong>kappa</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>эффективный показатель преломления TE-моды</p>
+</dd>
+</dl>
+<p>#### Литература #### 
+Computational photonics. An introduction with Matlab</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="multi_layer_slab_solver.MultiLayerSlab.neff_TM">
+<span class="sig-name descname"><span class="pre">neff_TM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neff_init</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi_layer_slab_solver.MultiLayerSlab.neff_TM" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод neff_TM - функция, представляющая собой дисперсионное уравнение 
+планарного волновода с произвольным числом слоев. На вход метода
+подается значение эффективного показателя преломления, исследуемого
+волновода. Когда ЭПП, поступающий на вход метода, соответствует 
+истинному значению ЭПП волновода, то функция выдает значение 0.</p>
+<p>Модовые, полевые и другие волноводные значения могут быть комплексными.
+В методе нет циклов, вместо них применяется массивы numpy.
+При вычислении квадратных корней от отрицательных с помощью 
+встроенных функций numpy могут появляться ошибки. 
+Numpy не останавливает программу, а показывает ошибку RuntimeError
+в массиве с отрицательными числами при вычислении корня появляются
+значения nan. Чтобы иметь возможность вычислять корни от отрицательных
+числе, в исходном numpy массиве должно быть хотя бы одно комплексное 
+число. Тогда корень от отрицательных чисел вычисляется правильно. 
+В переменных gamma, kappa в массив к каждому числу добавляется 
+произведение 1j * 0, чтобы числа стали комплексными и была возможность
+вычисления корня.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>neff_init</strong> (<em>complex</em>) – пробное значение ЭПП</p>
+</dd>
+<dt class="field-even">Переменные</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>beta</strong> (<em>complex</em>) – постоянная распространения</p></li>
+<li><p><strong>NumLayers</strong> (<em>int</em>) – число волноводных слоев планарного волновода</p></li>
+<li><p><strong>gamma_subs</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+<li><p><strong>gamma_clad</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+<li><p><strong>kappa</strong> (<em>complex</em>) – постоянная, характеризующие поле внутри волновода</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>эффективный показатель преломления TM-моды</p>
+</dd>
+</dl>
+<p>#### Литература ####
+Efficient and accurate numerical analysis of multilayer planar
+optical waveguides in lossy anisotropic media. 
+Chengkun Chen, Pierre Berini</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Оглавление</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Расчет планарного волновода</a><ul>
+<li><a class="reference internal" href="#id2">Модовый состав в зависимости от толщины пленки</a></li>
+<li><a class="reference internal" href="#id3">Эффективный показатель преломления</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-multi_layer_slab_solver">API класса <strong>multi_layer_slab_solver</strong> для расчета планарных волноводов</a></li>
+</ul>
+
+  <h4>Предыдущий раздел</h4>
+  <p class="topless"><a href="install.html"
+                        title="предыдущая глава">Установка пакета difra</a></p>
+  <h4>Следующий раздел</h4>
+  <p class="topless"><a href="waveguide.html"
+                        title="следующая глава">Расчет поперечного сечения канальных волноводов</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             >указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="waveguide.html" title="Расчет поперечного сечения канальных волноводов"
+             >вперёд</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Установка пакета difra"
+             >назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Расчет планарного волновода</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Difra Lab.
+    </div>
+  </body>
+</html>

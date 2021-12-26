@@ -1,0 +1,303 @@
+
+
+<!doctype html>
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Расчет поперечного сечения канальных волноводов &#8212; документация difra 0.0.1</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="Метод распространяющегося пучка (Beam propogation method, BPM)" href="bpm.html" />
+    <link rel="prev" title="Расчет планарного волновода" href="planar.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             accesskey="I">указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="bpm.html" title="Метод распространяющегося пучка (Beam propogation method, BPM)"
+             accesskey="N">вперёд</a> |</li>
+        <li class="right" >
+          <a href="planar.html" title="Расчет планарного волновода"
+             accesskey="P">назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Расчет поперечного сечения канальных волноводов</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1>Расчет поперечного сечения канальных волноводов<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">¶</a></h1>
+<section id="id2">
+<h2>Введение<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Для расчетов понадобятся следующие пакеты:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">difra.waveguides</span> <span class="kn">import</span> <span class="n">structures</span> <span class="k">as</span> <span class="n">sc</span>
+<span class="kn">import</span> <span class="nn">difra.wgms3d</span> <span class="k">as</span> <span class="nn">wg</span>
+</pre></div>
+</div>
+<p>Объект волновода создается со следующими параметрами:</p>
+<p>thickness (float) - общая толщина волновода. Обязательный.</p>
+<p>width (float) - Ширина «гребня». Обязательный.</p>
+<p>slab_thickness (float) - толщина нижней части гребенчатого волновода (если 0 - получаем волновод с наложенным полоском). Обязательный.</p>
+<p>sub_width (float) - ширина подложки (соответсвует ширине расчетного окна). Обязательный.</p>
+<p>sub_thickness (float) - толщина подложки (если подложка имеет слоистую структуру, задаем суммарное значение). Обязательный.</p>
+<p>clad_thickness (float) - толщина покровного слоая (если покровный слой имеет слоистую структуру, задаем суммарное значение). Обязательный.</p>
+<p>n_sub (float) - показатель преломления подложки (если подложка имеет слоистую структуру, задаем показатель преломления первого слоя от волновода). Обязательный.</p>
+<p>n_wg (float, list) - ПП волновода (если задать списком из двух элементов, например [2.5, 1.993], показатель преломления будет изменяться от центра к краям). Обязательный.</p>
+<p>n_clad (float) - ПП покровного слоая (если покровный слой имеет слоистую структуру, задаем самый верний слой). Обязательный.</p>
+<p>wavelength (float) - длина волны. Обязательный.</p>
+<p>clad_layers_thickness - list, список толщин слоев покровного слоя. Необязательный. Default = None.</p>
+<p>clad_layers_n - list, список ПП слоев покровного слоя. Необязательный. Default = None.</p>
+<p>sub_layers_thickness - list, список толщин слоев подложки. Необязательный. Default = None.</p>
+<p>sub_layers_n - list, список ПП слоев подложки. Необязательный. Default = None.</p>
+<p>Пример создания волновода:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+   <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">5</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+   <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Далее, для обсчета нам необходимо задать сетку и необходимые параметры. Для обсчета используется метод класса</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span><span class="o">.</span><span class="n">wgmscalc</span>
+</pre></div>
+</div>
+<p>Описание метода:</p>
+<p>wgmscalc(</p>
+<p>Nx - количество узлов вдоль X (int)</p>
+<p>Ny - количество узлов вдоль Y (int)</p>
+<p>n - количество мод для поиска (int), default = 2</p>
+<p>s - референсное значение моды (float), default = 0</p>
+<p>R - радиус изгиба волновода (float), default = 0</p>
+<p>PMLe, PMLw, PMLn, PMLs - расположение PML-слоя (справа, слева, сверху, снизу соотв.), значение соответствует тоолщине PML-слоя в количестве элементов сетики,</p>
+<p>Пример: PMLe = 5 создаст PML-слой справа толщиной 5 элементов сетки</p>
+<p>Default: [0, 0, 0, 0]</p>
+<p>size - list, default = None. Список из двух значений, указывает размер выходного изображения. Пример: size = [20, 20]</p>
+<p>plots - bool, default = True. True - вывод графиков на экран. False - отсутствие вывода графиков.</p>
+<p>)</p>
+<p>Пример обсчета:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Здесь мы задаем сетку 120 на 120 элементов, ищем 3 моды. Если все сделано правильно, получаем следующий результат:</p>
+<figure class="align-center">
+<img alt="Найденные моды" src="_images/Kanal_3_modes.png" />
+</figure>
+<p>Далее, мы хотим получить параметры волновода, для этого, после того, как осуществлен расчет, можно вызвать атрибут</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span><span class="o">.</span><span class="n">modes_dict</span>
+</pre></div>
+</div>
+<p>Он представляет из себя вложенный словарь и имеет следующую структуру:</p>
+<p>-номер_моды_0 ([«0»]):</p>
+<p>—Реальная часть эффективного показателя преломления ([«Neff_real»])</p>
+<p>—Мнимая часть эффективного показателя преломления ([«Neff_imag»])</p>
+<p>—Эффективный показатель преломления (сумма предыдущих двух) ([«Neff»])</p>
+<p>—Потери на распространение, dB/um ([«alpha»])</p>
+<p>—Потери на изгиб, dB/90deg ([«bendloss»])</p>
+<p>—Тип поляризации (H, E) ([«pol»])</p>
+<p>-номер_моды_1 ([«1»]):</p>
+<p>—…</p>
+<p>—…</p>
+<p>—…</p>
+<p>—…</p>
+<p>—…</p>
+<p>Для того, чтобы получить, например, реальную часть эффективного показателя преломления для основной моды, достаточно выполнить:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span><span class="o">.</span><span class="n">modes_dict</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">][</span><span class="s2">&quot;Neff_real&quot;</span><span class="p">]</span> <span class="c1">#Input</span>
+<span class="mf">1.5407404870161467</span> <span class="c1"># Output</span>
+</pre></div>
+</div>
+<p>Больше примеров можно найти здесь:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">modes</span> <span class="k">as</span> <span class="nn">ms</span>
+<span class="kn">from</span> <span class="nn">difra.waveguides</span> <span class="kn">import</span> <span class="n">structures</span> <span class="k">as</span> <span class="n">sc</span>
+<span class="kn">import</span> <span class="nn">difra.wgms3d</span> <span class="k">as</span> <span class="nn">wg</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Ridge_Waveguide(</span>
+<span class="sd">thickness - общая толщина волновода</span>
+<span class="sd">width - Ширина &quot;гребня&quot;</span>
+<span class="sd">slab_thickness - толщина нижней части гребенчатого волновода</span>
+<span class="sd">sub_width - ширина подложки (соответсвует ширине расчетного окна)</span>
+<span class="sd">sub_thickness - толщина подложки (если подложка имеет слоистую структуру, задаем суммарное значение)</span>
+<span class="sd">clad_thickness - толщина покровного слоая (если покровный слой имеет слоистую структуру, задаем суммарное значение)</span>
+<span class="sd">n_sub - показатель преломления подложки (если подложка имеет слоистую структуру, задаем показатель преломления первого слоя от волновода)</span>
+<span class="sd">n_wg - ПП волновода</span>
+<span class="sd">n_clad - ПП покровного слоая (если покровный слой имеет слоистую структуру, задаем самый верний слой)</span>
+<span class="sd">wavelength - длина волны</span>
+<span class="sd">clad_layers_thickness - list, список толщин слоев покровного слоя</span>
+<span class="sd">clad_layers_n - list, список ПП слоев покровного слоя</span>
+<span class="sd">sub_layers_thickness - list, список толщин слоев подложки </span>
+<span class="sd">sub_layers_n - list, список ПП слоев подложки</span>
+<span class="sd">)</span>
+
+<span class="sd">wgmscalc(</span>
+<span class="sd">Nx - количество узлов вдоль X (int)</span>
+<span class="sd">Ny - количество узлов вдоль Y (int)</span>
+<span class="sd">n - количество мод для поиска (int)</span>
+<span class="sd">s - референсное значение моды (float)</span>
+<span class="sd">R - радиус изгиба волновода (float)</span>
+<span class="sd">PMLe, PMLw, PMLn, PMLs - расположение PML-слоя (справа, слева, сверху, снизу соотв.), значение соответствует тоолщине PML-слоя в количестве элементов сетики,</span>
+<span class="sd">                         Пример: PMLe = 5 создаст PML-слой справа толщиной 5 элементов сетки</span>
+<span class="sd">size - list. Список из двух значений, указывает размер выходного изображения. Пример: size = [20, 20]</span>
+<span class="sd">plots - bool. True - вывод графиков на экран. False - отсутствие вывода графиков.</span>
+<span class="sd">)</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">wg1</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+           <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">5</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">,</span> <span class="n">clad_layers_thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">clad_layers_n</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.44</span><span class="p">,</span> <span class="mf">1.33</span><span class="p">,</span> <span class="mf">1.22</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> 
+           <span class="n">sub_layers_thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">sub_layers_n</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.33</span><span class="p">,</span> <span class="mf">1.44</span><span class="p">,</span> <span class="mf">1.55</span><span class="p">,</span> <span class="mf">1.66</span><span class="p">])</span>
+                  
+<span class="n">wg1</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+
+
+<span class="n">wg2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+           <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">5</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">)</span>
+        
+<span class="n">wg2</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+
+
+<span class="n">wg3</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+           <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">15</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">)</span>
+        
+<span class="n">wg3</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">PMLe</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mi">150</span><span class="p">)</span>
+
+<span class="c1">#Temporary usage of non constant refractive index</span>
+<span class="n">wg4</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+           <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">5</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">1.993</span><span class="p">],</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">)</span>
+        
+<span class="n">wg4</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Примеры типичных расчетов можно найти здесь:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">modes</span> <span class="k">as</span> <span class="nn">ms</span>
+
+<span class="kn">from</span> <span class="nn">difra.waveguides</span> <span class="kn">import</span> <span class="n">structures</span> <span class="k">as</span> <span class="n">sc</span>
+<span class="kn">import</span> <span class="nn">difra.wgms3d</span> <span class="k">as</span> <span class="nn">wg</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<span class="c1">#Зависимость ЭПП от длины волны</span>
+
+
+<span class="n">wls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">n_effs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">wl</span> <span class="ow">in</span> <span class="n">wls</span><span class="p">:</span>
+    <span class="n">wg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+               <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">5</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+               <span class="n">wavelength</span> <span class="o">=</span> <span class="n">wl</span><span class="p">)</span>
+    
+    <span class="n">wg</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">PMLe</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">plots</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="c1"># Радиус кривизны можно задать здесь</span>
+    <span class="n">n_effs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wg</span><span class="o">.</span><span class="n">modes_dict</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="s1">&#39;Neff&#39;</span><span class="p">])</span>
+    
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wls</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">n_eff</span><span class="p">)</span> <span class="k">for</span> <span class="n">n_eff</span> <span class="ow">in</span> <span class="n">n_effs</span><span class="p">])</span>
+
+
+<span class="c1"># Определение критического радиуса кривизны</span>
+
+<span class="n">wg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Ridge_Waveguide</span><span class="p">(</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">slab_thickness</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+           <span class="n">sub_width</span> <span class="o">=</span>  <span class="mi">15</span><span class="p">,</span> <span class="n">sub_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">clad_thickness</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_sub</span> <span class="o">=</span> <span class="mf">1.44</span><span class="p">,</span> <span class="n">n_wg</span> <span class="o">=</span> <span class="mf">1.9963</span><span class="p">,</span> <span class="n">n_clad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.55</span><span class="p">)</span>
+
+<span class="n">Rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Rlosses</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">Rs</span><span class="p">:</span>        
+    <span class="n">wg</span><span class="o">.</span><span class="n">wgmscalc</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">PMLe</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">R</span><span class="p">,</span> <span class="n">plots</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">Rlosses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wg</span><span class="o">.</span><span class="n">modes_dict</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">][</span><span class="s2">&quot;bendloss&quot;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Rs</span><span class="p">,</span> <span class="n">Rlosses</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note: На данный момент, изменение показателя преломления не работает одновремененно со слоистой структурой. Мы работаем над этим. Просто очень меееедленно…</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Оглавление</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Расчет поперечного сечения канальных волноводов</a><ul>
+<li><a class="reference internal" href="#id2">Введение</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Предыдущий раздел</h4>
+  <p class="topless"><a href="planar.html"
+                        title="предыдущая глава">Расчет планарного волновода</a></p>
+  <h4>Следующий раздел</h4>
+  <p class="topless"><a href="bpm.html"
+                        title="следующая глава">Метод распространяющегося пучка (Beam propogation method, BPM)</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Навигация</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Алфавитный указатель"
+             >указатель</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Содержание модулей Python"
+             >модули</a> |</li>
+        <li class="right" >
+          <a href="bpm.html" title="Метод распространяющегося пучка (Beam propogation method, BPM)"
+             >вперёд</a> |</li>
+        <li class="right" >
+          <a href="planar.html" title="Расчет планарного волновода"
+             >назад</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">документация difra 0.0.1</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Расчет поперечного сечения канальных волноводов</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Difra Lab.
+    </div>
+  </body>
+</html>

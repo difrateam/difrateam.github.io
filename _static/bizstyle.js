@@ -36,6 +36,6 @@ $(window).resize(function(){
         $("li.nav-item-0 a").text("Top");
     }
     else {
-        $("li.nav-item-0 a").text("документация difra 0.0.1");
+        $("li.nav-item-0 a").text("документация difra doc0.0.10");
     }
 });
